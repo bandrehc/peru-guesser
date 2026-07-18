@@ -1,11 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { MapContainer } from "react-leaflet";
-import type { FeatureCollection } from "geojson";
 import "leaflet/dist/leaflet.css";
-import GeoLayer from "./GeoLayer";
-import { loadGeo } from "@/lib/geo";
 
 // Extremos del territorio peruano, con un pequeño margen
 const PERU_BOUNDS: [[number, number], [number, number]] = [
@@ -16,15 +12,7 @@ const PERU_BOUNDS: [[number, number], [number, number]] = [
 // Color de "océano": fondo liso, sin mapa base (estilo Seterra)
 const OCEAN = "#a5c9e3";
 
-export default function MapCanvas() {
-  const [departamentos, setDepartamentos] = useState<FeatureCollection | null>(
-    null
-  );
-
-  useEffect(() => {
-    loadGeo("departamentos").then(setDepartamentos).catch(console.error);
-  }, []);
-
+export default function MapCanvas({ children }: { children?: React.ReactNode }) {
   return (
     <MapContainer
       bounds={PERU_BOUNDS}
@@ -41,7 +29,7 @@ export default function MapCanvas() {
       className="h-full w-full"
       style={{ background: OCEAN }}
     >
-      {departamentos && <GeoLayer data={departamentos} />}
+      {children}
     </MapContainer>
   );
 }
