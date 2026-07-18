@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Documento de arranque interno (no subir al repo)
 PROMPT_ARRANQUE.md
+
+# GeoJSON crudos descargados (los optimizados sí se versionan en public/geo)
+/data/raw/

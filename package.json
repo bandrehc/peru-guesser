@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "data:fetch": "node scripts/fetch-geo.mjs",
+    "data:build": "node scripts/build-geo.mjs"
   },
   "dependencies": {
     "leaflet": "^1.9.4",
@@ -23,6 +25,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "mapshaper": "^0.7.45",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
