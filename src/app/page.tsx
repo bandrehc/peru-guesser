@@ -95,10 +95,27 @@ function OptionCard({
   );
 }
 
+const ALCANCES = [
+  {
+    id: "total",
+    nombre: "Total",
+    detalle: "Las 196 provincias de todo el país",
+  },
+  {
+    id: "local",
+    nombre: "Local",
+    detalle: "Solo las provincias de un departamento",
+  },
+];
+
 export default function Home() {
   const [nivel, setNivel] = useState("departamentos");
   const [modo, setModo] = useState("pin");
+  const [alcance, setAlcance] = useState("total");
   const [dep, setDep] = useState("15"); // Lima por defecto
+
+  const necesitaDep =
+    nivel === "distritos" || (nivel === "provincias" && alcance === "local");
 
   return (
     <div className="flex min-h-dvh flex-col items-center bg-zinc-50 px-4 py-10">
@@ -127,7 +144,27 @@ export default function Home() {
           ))}
         </div>
 
-        {nivel === "distritos" && (
+        {nivel === "provincias" && (
+          <div className="mt-4">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
+              Alcance
+            </h2>
+            <div className="mt-2 grid gap-3 sm:grid-cols-2">
+              {ALCANCES.map((a) => (
+                <OptionCard
+                  key={a.id}
+                  nombre={a.nombre}
+                  detalle={a.detalle}
+                  disponible
+                  seleccionado={a.id === alcance}
+                  onSelect={() => setAlcance(a.id)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {necesitaDep && (
           <div className="mt-4">
             <label
               htmlFor="dep-select"
@@ -167,7 +204,7 @@ export default function Home() {
         </div>
 
         <Link
-          href={`/play?nivel=${nivel}&modo=${modo}${nivel === "distritos" ? `&dep=${dep}` : ""}`}
+          href={`/play?nivel=${nivel}&modo=${modo}${necesitaDep ? `&dep=${dep}` : ""}`}
           className="mt-10 block w-full rounded-xl bg-red-600 px-6 py-4 text-center text-lg font-bold text-white shadow-md transition-colors hover:bg-red-700"
         >
           Jugar

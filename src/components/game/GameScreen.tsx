@@ -73,7 +73,11 @@ export default function GameScreen({
 }: {
   nivel: PlayableLevel;
   modo: PlayableMode;
-  /** Código UBIGEO del departamento; requerido cuando nivel === "distritos". */
+  /**
+   * Código UBIGEO del departamento. Requerido cuando nivel === "distritos";
+   * opcional en "provincias" (alcance local: solo las provincias de ese
+   * departamento, mostrando únicamente su polígono).
+   */
   dep?: string;
 }) {
   const [geo, setGeo] = useState<FeatureCollection | null>(null);
@@ -82,9 +86,31 @@ export default function GameScreen({
   const { state, start, resolve, clearFlash } = useGame();
 
   useEffect(() => {
-    const promise =
-      nivel === "distritos" && dep ? loadDistritos(dep) : loadGeo(nivel as "departamentos" | "provincias");
-    promise.then(setGeo).catch(() => setLoadError(true));
+    let cancelled = false;
+    (async () => {
+      try {
+        let data =
+          nivel === "distritos" && dep
+            ? await loadDistritos(dep)
+            : await loadGeo(nivel as "departamentos" | "provincias");
+        // Alcance local del nivel provincial: solo las provincias del
+        // departamento elegido (sus 2 primeros dígitos de UBIGEO)
+        if (nivel === "provincias" && dep) {
+          data = {
+            ...data,
+            features: data.features.filter((f) =>
+              (f.properties as UnitProperties).id.startsWith(dep)
+            ),
+          };
+        }
+        if (!cancelled) setGeo(data);
+      } catch {
+        if (!cancelled) setLoadError(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [nivel, dep]);
 
   const units = useMemo<UnitRef[]>(() => {
@@ -198,9 +224,10 @@ export default function GameScreen({
           >
             ←
           </Link>
-          {nivel === "distritos" && dep && (
+          {dep && nivel !== "departamentos" && (
             <span className="shrink-0 rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
-              Distritos de {DEPARTAMENTOS.find((d) => d.id === dep)?.nombre ?? dep}
+              {nivel === "distritos" ? "Distritos" : "Provincias"} de{" "}
+              {DEPARTAMENTOS.find((d) => d.id === dep)?.nombre ?? dep}
             </span>
           )}
           <GameHud

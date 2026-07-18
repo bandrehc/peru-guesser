@@ -27,16 +27,19 @@ export default async function PlayPage({
     redirect("/");
   }
 
+  const depValido = DEPARTAMENTOS.some((d) => d.id === dep);
+
   // El nivel distrital se juega por departamento
-  if (nivel === "distritos" && !DEPARTAMENTOS.some((d) => d.id === dep)) {
-    redirect("/");
-  }
+  if (nivel === "distritos" && !depValido) redirect("/");
+
+  // En provincias, dep es opcional (alcance local); si viene, debe ser válido
+  if (nivel === "provincias" && dep !== undefined && !depValido) redirect("/");
 
   return (
     <GameScreen
       nivel={nivel as PlayableLevel}
       modo={modo as PlayableMode}
-      dep={dep}
+      dep={nivel === "departamentos" ? undefined : dep}
     />
   );
 }
