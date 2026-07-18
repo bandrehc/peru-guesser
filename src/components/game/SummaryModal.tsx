@@ -26,12 +26,13 @@ export default function SummaryModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="summary-title"
-      className="absolute inset-0 z-[1000] flex items-center justify-center bg-black/40 p-4"
+      className="animate-backdrop-in absolute inset-0 z-[1000] flex items-center justify-center bg-tinta/45 p-4 backdrop-blur-sm"
     >
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
-        <h2 id="summary-title" className="text-2xl font-bold text-zinc-900">
+      <div className="animate-modal-in w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+        <h2 id="summary-title" className="text-2xl font-bold text-tinta">
           ¡Ronda completada! 🎉
         </h2>
+        <div className="hilo-sep mt-3 w-14" />
         <dl className="mt-4 space-y-2 text-zinc-700">
           <div className="flex justify-between">
             <dt>{variant === "foto" ? "Fotos jugadas" : "Unidades identificadas"}</dt>
@@ -45,7 +46,7 @@ export default function SummaryModal({
           </div>
           <div className="flex justify-between">
             <dt>Errores</dt>
-            <dd className="font-semibold tabular-nums text-red-600">{errores}</dd>
+            <dd className="font-semibold tabular-nums text-carmesi">{errores}</dd>
           </div>
           <div className="flex justify-between">
             <dt>Tiempo</dt>
@@ -56,13 +57,13 @@ export default function SummaryModal({
           <button
             onClick={onRestart}
             autoFocus
-            className="flex-1 rounded-lg bg-red-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-red-700"
+            className="focus-hilo flex-1 rounded-lg bg-carmesi px-4 py-2 font-semibold text-white shadow-[0_4px_14px_rgba(217,20,56,0.25)] transition-all duration-200 ease-in-out hover:bg-carmesi-ink active:scale-[0.98]"
           >
             Jugar de nuevo
           </button>
           <Link
             href="/"
-            className="flex-1 rounded-lg border border-zinc-300 px-4 py-2 text-center font-semibold text-zinc-700 transition-colors hover:bg-zinc-100"
+            className="focus-hilo flex-1 rounded-lg border border-zinc-200 px-4 py-2 text-center font-semibold text-zinc-700 transition-colors duration-200 ease-in-out hover:border-carmesi/50 hover:bg-zinc-50"
           >
             Volver
           </Link>

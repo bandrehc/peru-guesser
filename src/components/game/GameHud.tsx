@@ -45,7 +45,7 @@ export default function GameHud({
         <span className="font-semibold text-emerald-700">{done}</span> / {total}
       </p>
       <p className="text-sm tabular-nums text-zinc-600">
-        Errores: <span className="font-semibold text-red-600">{errores}</span>
+        Errores: <span className="font-semibold text-carmesi">{errores}</span>
       </p>
       <p className="text-sm tabular-nums text-zinc-600">⏱ {formatTime(elapsed)}</p>
     </div>

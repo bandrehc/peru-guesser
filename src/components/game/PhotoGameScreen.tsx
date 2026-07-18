@@ -168,16 +168,16 @@ export default function PhotoGameScreen() {
 
   return (
     <div className="flex h-dvh flex-col">
-      <header className="z-10 border-b border-zinc-200 bg-white px-4 py-3 shadow-sm">
+      <header className="z-10 border-b border-zinc-200/80 bg-white/85 px-4 py-3 shadow-sm backdrop-blur">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
           <Link
             href="/"
             aria-label="Volver al inicio"
-            className="rounded-lg border border-zinc-300 px-3 py-1.5 font-semibold text-zinc-700 transition-colors hover:bg-zinc-100"
+            className="focus-hilo rounded-lg border border-zinc-200 px-3 py-1.5 font-semibold text-zinc-700 transition-colors duration-200 ease-in-out hover:border-carmesi/50 hover:bg-zinc-50"
           >
             ←
           </Link>
-          <span className="shrink-0 rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
+          <span className="shrink-0 rounded-full bg-carmesi/10 px-2.5 py-0.5 text-xs font-medium text-carmesi-ink">
             Foto {Math.min(nroFoto, total)} de {total}
           </span>
           <GameHud
@@ -239,7 +239,7 @@ export default function PhotoGameScreen() {
               aria-live="polite"
               className={
                 "absolute left-1/2 top-2 -translate-x-1/2 rounded-full px-3 py-1 text-sm font-bold text-white shadow " +
-                (reveal.ok ? "bg-emerald-600" : "bg-red-600")
+                (reveal.ok ? "bg-emerald-600" : "bg-carmesi")
               }
             >
               {reveal.texto}

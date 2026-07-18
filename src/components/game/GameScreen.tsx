@@ -233,17 +233,17 @@ export default function GameScreen({
 
   return (
     <div className="flex h-dvh flex-col">
-      <header className="z-10 border-b border-zinc-200 bg-white px-4 py-3 shadow-sm">
+      <header className="z-10 border-b border-zinc-200/80 bg-white/85 px-4 py-3 shadow-sm backdrop-blur">
         <div className="flex items-center gap-4">
           <Link
             href="/"
             aria-label="Volver al inicio"
-            className="rounded-lg border border-zinc-300 px-3 py-1.5 font-semibold text-zinc-700 transition-colors hover:bg-zinc-100"
+            className="focus-hilo rounded-lg border border-zinc-200 px-3 py-1.5 font-semibold text-zinc-700 transition-colors duration-200 ease-in-out hover:border-carmesi/50 hover:bg-zinc-50"
           >
             ←
           </Link>
           {dep && nivel !== "departamentos" && (
-            <span className="shrink-0 rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
+            <span className="shrink-0 rounded-full bg-carmesi/10 px-2.5 py-0.5 text-xs font-medium text-carmesi-ink">
               {nivel === "distritos" ? "Distritos" : "Provincias"} de{" "}
               {prov
                 ? `${PROVINCIAS.find((p) => p.id === prov)?.nombre ?? prov} (${
@@ -290,7 +290,7 @@ export default function GameScreen({
                 setFocus((f) => ({ id: target.id, seq: (f?.seq ?? 0) + 1 }))
               }
               title="Encuadrar la unidad resaltada en el mapa"
-              className="shrink-0 rounded-lg border-2 border-zinc-300 bg-white px-3 py-2 font-medium text-zinc-700 transition-colors hover:border-red-400 hover:bg-zinc-50"
+              className="focus-hilo shrink-0 rounded-lg border-2 border-zinc-200 bg-white px-3 py-2 font-medium text-zinc-700 transition-colors duration-200 ease-in-out hover:border-carmesi/50 hover:bg-zinc-50"
             >
               📍 <span className="hidden sm:inline">Ver en el mapa</span>
             </button>

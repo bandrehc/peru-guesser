@@ -93,17 +93,17 @@ export default function TypeAnswerInput({
         onKeyDown={onKeyDown}
         onBlur={() => setOpen(false)}
         className={
-          "w-full rounded-lg border-2 bg-white px-4 py-2 text-zinc-900 outline-none transition-colors " +
+          "w-full rounded-xl border-2 bg-white px-4 py-2 text-tinta shadow-sm outline-none transition-colors duration-200 ease-in-out " +
           (result === "fail"
-            ? "animate-shake border-red-500"
+            ? "animate-shake border-carmesi"
             : result === "ok"
               ? "border-emerald-500"
-              : "border-zinc-300 focus:border-red-600")
+              : "border-zinc-200 focus:border-carmesi")
         }
       />
       <p aria-live="polite" className="mt-1 min-h-5 text-sm">
         {result === "fail" && (
-          <span className="font-medium text-red-600">✗ Incorrecto, intenta de nuevo</span>
+          <span className="font-medium text-carmesi-ink">✗ Incorrecto, intenta de nuevo</span>
         )}
         {result === "ok" && (
           <span className="font-medium text-emerald-700">✓ ¡Correcto!</span>
@@ -114,7 +114,7 @@ export default function TypeAnswerInput({
           id={`${listId}-listbox`}
           role="listbox"
           aria-label="Sugerencias"
-          className="absolute top-12 z-[1100] w-full overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-lg"
+          className="absolute top-12 z-[1100] w-full overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-xl"
         >
           {filtered.map((o, i) => (
             <li
@@ -129,8 +129,8 @@ export default function TypeAnswerInput({
               }}
               onMouseEnter={() => setActive(i)}
               className={
-                "cursor-pointer px-4 py-2 text-zinc-800 " +
-                (i === active ? "bg-red-50 text-red-700" : "")
+                "cursor-pointer px-4 py-2 text-zinc-800 transition-colors duration-150 ease-in-out " +
+                (i === active ? "bg-carmesi/10 text-carmesi-ink" : "")
               }
             >
               {o}
