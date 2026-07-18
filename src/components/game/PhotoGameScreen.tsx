@@ -248,7 +248,13 @@ export default function PhotoGameScreen() {
         </aside>
         <div className="relative min-h-0 flex-1">
           {geo ? (
-            <MapStage data={geo} getStyle={getStyle} onUnitClick={handleUnitClick} />
+            <MapStage
+              data={geo}
+              getStyle={getStyle}
+              onUnitClick={handleUnitClick}
+              doneIds={state.completadas}
+              wrongId={state.flash?.unitId ?? null}
+            />
           ) : (
             <div className="flex h-full items-center justify-center text-zinc-500">
               Cargando datos…

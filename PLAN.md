@@ -96,7 +96,7 @@ El banco es un JSON estático curado (`data/fotos/departamentos.json`) con: URL,
 | 5 | Nivel provincial en ambos modos de identificación | ✅ Hecho (con alcance Total —196 provincias— o Local —solo las provincias de un departamento, mostrando únicamente su polígono—) |
 | 6 | Nivel distrital: carga perezosa por departamento, rendimiento en móvil | ✅ Hecho (una ronda = los distritos de un departamento; nombres duplicados desambiguados con la provincia) |
 | 7 | Modo Fotográfico departamental: script de candidatos + curación + integración | ✅ Hecho (banco desde Wikimedia Commons con verificación punto-en-polígono; Mapillary pendiente de token como mejora) |
-| 8 | Pulido: accesibilidad (ícono/patrón además de color para daltonismo), responsive, QA, deploy final | Pendiente |
+| 8 | Pulido: accesibilidad (ícono/patrón además de color para daltonismo), responsive, QA, deploy final | ✅ Hecho — fase 1 completa |
 
 Los pasos 1–3 son el camino crítico: validado el mapa departamental jugable, el resto es extensión del mismo motor.
 

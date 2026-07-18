@@ -83,6 +83,7 @@ export default function GameScreen({
   const [geo, setGeo] = useState<FeatureCollection | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [lastResult, setLastResult] = useState<"ok" | "fail" | null>(null);
+  const [focus, setFocus] = useState<{ id: string; seq: number } | null>(null);
   const { state, start, resolve, clearFlash } = useGame();
 
   useEffect(() => {
@@ -253,12 +254,25 @@ export default function GameScreen({
           />
         </div>
         {modo === "escribir" && state.status === "playing" && (
-          <div className="mt-2">
-            <TypeAnswerInput
-              options={remainingNames}
-              onSubmit={handleAnswer}
-              result={lastResult}
-            />
+          <div className="mt-2 flex items-start gap-2">
+            <div className="flex-1">
+              <TypeAnswerInput
+                options={remainingNames}
+                onSubmit={handleAnswer}
+                result={lastResult}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                target &&
+                setFocus((f) => ({ id: target.id, seq: (f?.seq ?? 0) + 1 }))
+              }
+              title="Encuadrar la unidad resaltada en el mapa"
+              className="shrink-0 rounded-lg border-2 border-zinc-300 bg-white px-3 py-2 font-medium text-zinc-700 transition-colors hover:border-red-400 hover:bg-zinc-50"
+            >
+              📍 <span className="hidden sm:inline">Ver en el mapa</span>
+            </button>
           </div>
         )}
       </header>
@@ -268,6 +282,9 @@ export default function GameScreen({
             data={geo}
             getStyle={getStyle}
             onUnitClick={modo === "pin" ? handleUnitClick : undefined}
+            doneIds={state.completadas}
+            wrongId={state.flash?.unitId ?? null}
+            focus={focus}
           />
         ) : (
           <div className="flex h-full items-center justify-center text-zinc-500">
