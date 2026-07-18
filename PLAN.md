@@ -92,8 +92,8 @@ El banco es un JSON estático curado (`data/fotos/departamentos.json`) con: URL,
 | 1 | Scaffold Next.js + TS + Tailwind + react-leaflet, mapa base centrado en Perú, deploy temprano a Vercel | ✅ Hecho |
 | 2 | Pipeline de datos + capa departamental optimizada renderizando | ✅ Hecho (estilo Seterra: sin teselas, solo polígonos sobre fondo liso; provincias/distritos pendientes de correr por el mismo pipeline) |
 | 3 | Motor de juego + Modo Pin departamental (juego completo jugable: pintado permanente, parpadeo rojo en error, resumen con tiempo) | ✅ Hecho |
-| 4 | Modo Escribir: normalización tildes/mayúsculas, autocompletado accesible (combobox ARIA) | Pendiente |
-| 5 | Nivel provincial en ambos modos de identificación | Pendiente |
+| 4 | Modo Escribir: normalización tildes/mayúsculas, autocompletado accesible (combobox ARIA) | ✅ Hecho |
+| 5 | Nivel provincial en ambos modos de identificación | ✅ Hecho |
 | 6 | Nivel distrital: carga perezosa por departamento, rendimiento en móvil | Pendiente |
 | 7 | Modo Fotográfico departamental: script de candidatos + curación + integración | Pendiente |
 | 8 | Pulido: accesibilidad (ícono/patrón además de color para daltonismo), responsive, QA, deploy final | Pendiente |

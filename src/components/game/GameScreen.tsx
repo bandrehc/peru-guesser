@@ -6,10 +6,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Feature, FeatureCollection } from "geojson";
 import type { PathOptions } from "leaflet";
 import { loadGeo, type UnitProperties } from "@/lib/geo";
+import { normalizeName } from "@/lib/normalize";
 import type { UnitRef } from "@/lib/types";
 import { useGame } from "@/hooks/useGame";
 import GameHud from "./GameHud";
 import SummaryModal from "./SummaryModal";
+import TypeAnswerInput from "./TypeAnswerInput";
 
 const MapStage = dynamic(() => import("@/components/map/MapStage"), {
   ssr: false,
@@ -35,7 +37,7 @@ const DONE_STYLE: PathOptions = {
   weight: 1,
 };
 
-// Error: destello rojo sobre la unidad clickeada
+// Error: destello rojo
 const FLASH_STYLE: PathOptions = {
   fillColor: "#e05252",
   fillOpacity: 1,
@@ -43,18 +45,42 @@ const FLASH_STYLE: PathOptions = {
   weight: 1.5,
 };
 
-const FLASH_MS = 650;
+// Modo escribir: unidad objetivo resaltada
+const TARGET_STYLE: PathOptions = {
+  fillColor: "#f6b93b",
+  fillOpacity: 1,
+  color: "#8a5a00",
+  weight: 2,
+};
 
-export default function GameScreen() {
+const FLASH_MS = 650;
+const RESULT_MS = 1200;
+
+export type PlayableMode = "pin" | "escribir";
+export type PlayableLevel = "departamentos" | "provincias";
+
+const ESCRIBIR_PROMPT: Record<PlayableLevel, string> = {
+  departamentos: "¿Qué departamento está resaltado?",
+  provincias: "¿Qué provincia está resaltada?",
+};
+
+export default function GameScreen({
+  nivel,
+  modo,
+}: {
+  nivel: PlayableLevel;
+  modo: PlayableMode;
+}) {
   const [geo, setGeo] = useState<FeatureCollection | null>(null);
   const [loadError, setLoadError] = useState(false);
-  const { state, start, guess, clearFlash } = useGame();
+  const [lastResult, setLastResult] = useState<"ok" | "fail" | null>(null);
+  const { state, start, resolve, clearFlash } = useGame();
 
   useEffect(() => {
-    loadGeo("departamentos")
+    loadGeo(nivel)
       .then(setGeo)
       .catch(() => setLoadError(true));
-  }, []);
+  }, [nivel]);
 
   const units = useMemo<UnitRef[]>(() => {
     if (!geo) return [];
@@ -76,7 +102,36 @@ export default function GameScreen() {
     return () => clearTimeout(id);
   }, [state.flash, clearFlash]);
 
+  // Apaga el mensaje de correcto/incorrecto del input
+  useEffect(() => {
+    if (!lastResult) return;
+    const id = setTimeout(() => setLastResult(null), RESULT_MS);
+    return () => clearTimeout(id);
+  }, [lastResult]);
+
   const completadas = useMemo(() => new Set(state.completadas), [state.completadas]);
+  const target = state.queue[0] ?? null;
+
+  const handleUnitClick = useCallback(
+    (id: string) => {
+      if (modo !== "pin" || !target || state.status !== "playing") return;
+      // Clic sobre una unidad ya completada: no cuenta como error
+      if (completadas.has(id)) return;
+      resolve(id === target.id, id === target.id ? null : id);
+    },
+    [modo, target, state.status, completadas, resolve]
+  );
+
+  const handleAnswer = useCallback(
+    (text: string) => {
+      if (!target || state.status !== "playing") return;
+      const ok = normalizeName(text) === normalizeName(target.nombre);
+      // En error, el destello rojo cae sobre la unidad resaltada
+      resolve(ok, ok ? null : target.id);
+      setLastResult(ok ? "ok" : "fail");
+    },
+    [target, state.status, resolve]
+  );
 
   const getStyle = useCallback(
     (feature?: Feature): PathOptions => {
@@ -84,12 +139,17 @@ export default function GameScreen() {
       if (!id) return BASE_STYLE;
       if (state.flash?.unitId === id) return FLASH_STYLE;
       if (completadas.has(id)) return DONE_STYLE;
+      if (modo === "escribir" && target?.id === id) return TARGET_STYLE;
       return BASE_STYLE;
     },
-    [state.flash, completadas]
+    [state.flash, completadas, modo, target]
   );
 
-  const target = state.queue[0] ?? null;
+  const remainingNames = useMemo(
+    () => state.queue.map((u) => u.nombre).sort((a, b) => a.localeCompare(b, "es")),
+    [state.queue]
+  );
+
   const total = units.length;
   const perfectas = useMemo(
     () =>
@@ -111,26 +171,54 @@ export default function GameScreen() {
 
   return (
     <div className="flex h-dvh flex-col">
-      <header className="z-10 flex items-center gap-4 border-b border-zinc-200 bg-white px-4 py-3 shadow-sm">
-        <Link
-          href="/"
-          aria-label="Volver al inicio"
-          className="rounded-lg border border-zinc-300 px-3 py-1.5 font-semibold text-zinc-700 transition-colors hover:bg-zinc-100"
-        >
-          ←
-        </Link>
-        <GameHud
-          targetName={target?.nombre ?? null}
-          done={state.completadas.length}
-          total={total}
-          errores={state.errores}
-          startedAt={state.startedAt}
-          finishedAt={state.finishedAt}
-        />
+      <header className="z-10 border-b border-zinc-200 bg-white px-4 py-3 shadow-sm">
+        <div className="flex items-center gap-4">
+          <Link
+            href="/"
+            aria-label="Volver al inicio"
+            className="rounded-lg border border-zinc-300 px-3 py-1.5 font-semibold text-zinc-700 transition-colors hover:bg-zinc-100"
+          >
+            ←
+          </Link>
+          <GameHud
+            prompt={
+              modo === "pin" ? (
+                <>
+                  <span className="text-zinc-500">Encuentra: </span>
+                  <span className="font-bold text-zinc-900">
+                    {target?.nombre ?? "—"}
+                  </span>
+                </>
+              ) : (
+                <span className="font-semibold text-zinc-900">
+                  {ESCRIBIR_PROMPT[nivel]}
+                </span>
+              )
+            }
+            done={state.completadas.length}
+            total={total}
+            errores={state.errores}
+            startedAt={state.startedAt}
+            finishedAt={state.finishedAt}
+          />
+        </div>
+        {modo === "escribir" && state.status === "playing" && (
+          <div className="mt-2">
+            <TypeAnswerInput
+              options={remainingNames}
+              onSubmit={handleAnswer}
+              result={lastResult}
+            />
+          </div>
+        )}
       </header>
       <main className="relative flex-1">
         {geo ? (
-          <MapStage data={geo} getStyle={getStyle} onUnitClick={guess} />
+          <MapStage
+            data={geo}
+            getStyle={getStyle}
+            onUnitClick={modo === "pin" ? handleUnitClick : undefined}
+          />
         ) : (
           <div className="flex h-full items-center justify-center text-zinc-500">
             Cargando datos…

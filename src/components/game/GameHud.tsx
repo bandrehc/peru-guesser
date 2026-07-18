@@ -10,7 +10,7 @@ export function formatTime(ms: number): string {
 }
 
 interface GameHudProps {
-  targetName: string | null;
+  prompt: React.ReactNode;
   done: number;
   total: number;
   errores: number;
@@ -19,7 +19,7 @@ interface GameHudProps {
 }
 
 export default function GameHud({
-  targetName,
+  prompt,
   done,
   total,
   errores,
@@ -39,8 +39,7 @@ export default function GameHud({
   return (
     <div className="flex flex-wrap items-center gap-x-6 gap-y-1">
       <p className="text-base" aria-live="polite">
-        <span className="text-zinc-500">Encuentra: </span>
-        <span className="font-bold text-zinc-900">{targetName ?? "—"}</span>
+        {prompt}
       </p>
       <p className="text-sm tabular-nums text-zinc-600">
         <span className="font-semibold text-emerald-700">{done}</span> / {total}

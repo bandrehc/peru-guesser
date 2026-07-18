@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 const NIVELES = [
   {
@@ -11,7 +14,7 @@ const NIVELES = [
     id: "provincias",
     nombre: "Provincial",
     detalle: "196 provincias",
-    disponible: false,
+    disponible: true,
   },
   {
     id: "distritos",
@@ -32,7 +35,7 @@ const MODOS = [
     id: "escribir",
     nombre: "Escribir",
     detalle: "Resaltamos la unidad, escribe su nombre",
-    disponible: false,
+    disponible: true,
   },
   {
     id: "foto",
@@ -47,23 +50,24 @@ function OptionCard({
   detalle,
   disponible,
   seleccionado,
+  onSelect,
 }: {
   nombre: string;
   detalle: string;
   disponible: boolean;
   seleccionado: boolean;
+  onSelect?: () => void;
 }) {
-  return (
-    <div
-      className={
-        "rounded-xl border p-4 " +
-        (seleccionado
-          ? "border-red-600 bg-red-50 ring-1 ring-red-600"
-          : disponible
-            ? "border-zinc-300 bg-white"
-            : "border-zinc-200 bg-zinc-50 opacity-60")
-      }
-    >
+  const className =
+    "rounded-xl border p-4 text-left transition-colors " +
+    (seleccionado
+      ? "border-red-600 bg-red-50 ring-1 ring-red-600"
+      : disponible
+        ? "border-zinc-300 bg-white hover:border-red-400"
+        : "border-zinc-200 bg-zinc-50 opacity-60");
+
+  const content = (
+    <>
       <div className="flex items-center justify-between gap-2">
         <span className="font-semibold text-zinc-900">{nombre}</span>
         {!disponible && (
@@ -73,11 +77,27 @@ function OptionCard({
         )}
       </div>
       <p className="mt-1 text-sm text-zinc-600">{detalle}</p>
-    </div>
+    </>
+  );
+
+  if (!disponible) return <div className={className}>{content}</div>;
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={seleccionado}
+      className={className + " cursor-pointer"}
+    >
+      {content}
+    </button>
   );
 }
 
 export default function Home() {
+  const [nivel, setNivel] = useState("departamentos");
+  const [modo, setModo] = useState("pin");
+
   return (
     <div className="flex min-h-dvh flex-col items-center bg-zinc-50 px-4 py-10">
       <main className="w-full max-w-2xl">
@@ -99,7 +119,8 @@ export default function Home() {
               nombre={n.nombre}
               detalle={n.detalle}
               disponible={n.disponible}
-              seleccionado={n.id === "departamentos"}
+              seleccionado={n.id === nivel}
+              onSelect={() => setNivel(n.id)}
             />
           ))}
         </div>
@@ -114,13 +135,14 @@ export default function Home() {
               nombre={m.nombre}
               detalle={m.detalle}
               disponible={m.disponible}
-              seleccionado={m.id === "pin"}
+              seleccionado={m.id === modo}
+              onSelect={() => setModo(m.id)}
             />
           ))}
         </div>
 
         <Link
-          href="/play?nivel=departamentos&modo=pin"
+          href={`/play?nivel=${nivel}&modo=${modo}`}
           className="mt-10 block w-full rounded-xl bg-red-600 px-6 py-4 text-center text-lg font-bold text-white shadow-md transition-colors hover:bg-red-700"
         >
           Jugar

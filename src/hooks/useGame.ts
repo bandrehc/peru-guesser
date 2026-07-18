@@ -20,7 +20,7 @@ export interface GameState {
 
 export type GameAction =
   | { type: "START"; units: UnitRef[] }
-  | { type: "GUESS"; unitId: string }
+  | { type: "RESOLVE"; correct: boolean; flashUnitId: string | null }
   | { type: "CLEAR_FLASH" };
 
 const initialState: GameState = {
@@ -44,12 +44,14 @@ function reducer(state: GameState, action: GameAction): GameState {
         startedAt: Date.now(),
       };
 
-    case "GUESS": {
+    // El llamador decide si el intento fue correcto (clic o nombre escrito);
+    // el reducer solo avanza la partida y lleva la cuenta.
+    case "RESOLVE": {
       if (state.status !== "playing") return state;
       const target = state.queue[0];
       if (!target) return state;
 
-      if (action.unitId === target.id) {
+      if (action.correct) {
         const queue = state.queue.slice(1);
         const finished = queue.length === 0;
         return {
@@ -62,9 +64,6 @@ function reducer(state: GameState, action: GameAction): GameState {
         };
       }
 
-      // Clic sobre una unidad ya completada: no cuenta como error
-      if (state.completadas.includes(action.unitId)) return state;
-
       return {
         ...state,
         errores: state.errores + 1,
@@ -72,7 +71,9 @@ function reducer(state: GameState, action: GameAction): GameState {
           ...state.fallosPorUnidad,
           [target.id]: (state.fallosPorUnidad[target.id] ?? 0) + 1,
         },
-        flash: { unitId: action.unitId, seq: (state.flash?.seq ?? 0) + 1 },
+        flash: action.flashUnitId
+          ? { unitId: action.flashUnitId, seq: (state.flash?.seq ?? 0) + 1 }
+          : null,
       };
     }
 
@@ -97,11 +98,12 @@ export function useGame() {
     (units: UnitRef[]) => dispatch({ type: "START", units: shuffle(units) }),
     []
   );
-  const guess = useCallback(
-    (unitId: string) => dispatch({ type: "GUESS", unitId }),
+  const resolve = useCallback(
+    (correct: boolean, flashUnitId: string | null = null) =>
+      dispatch({ type: "RESOLVE", correct, flashUnitId }),
     []
   );
   const clearFlash = useCallback(() => dispatch({ type: "CLEAR_FLASH" }), []);
 
-  return { state, start, guess, clearFlash };
+  return { state, start, resolve, clearFlash };
 }
