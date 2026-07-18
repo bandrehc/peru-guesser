@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { DEPARTAMENTOS } from "@/lib/departamentos";
+import { PROVINCIAS } from "@/lib/provincias";
 
 const NIVELES = [
   {
@@ -20,7 +21,7 @@ const NIVELES = [
   {
     id: "distritos",
     nombre: "Distrital",
-    detalle: "1874 distritos, por departamento",
+    detalle: "1874 distritos, por departamento o provincia",
     disponible: true,
   },
 ];
@@ -113,10 +114,28 @@ export default function Home() {
   const [modo, setModo] = useState("pin");
   const [alcance, setAlcance] = useState("total");
   const [dep, setDep] = useState("15"); // Lima por defecto
+  // "" = todas las provincias del departamento
+  const [prov, setProv] = useState("");
 
   const necesitaDep =
     modo !== "foto" &&
     (nivel === "distritos" || (nivel === "provincias" && alcance === "local"));
+
+  // El filtro de provincia solo aplica al nivel distrital
+  const necesitaProv = necesitaDep && nivel === "distritos";
+
+  const provinciasDelDep = useMemo(
+    () =>
+      PROVINCIAS.filter((p) => p.id.startsWith(dep)).sort((a, b) =>
+        a.nombre.localeCompare(b.nombre, "es")
+      ),
+    [dep]
+  );
+
+  const cambiaDep = (id: string) => {
+    setDep(id);
+    setProv(""); // la provincia elegida pertenece al departamento anterior
+  };
 
   // El modo fotográfico solo existe a nivel departamental en esta fase
   const seleccionaModo = (id: string) => {
@@ -182,12 +201,36 @@ export default function Home() {
             <select
               id="dep-select"
               value={dep}
-              onChange={(e) => setDep(e.target.value)}
+              onChange={(e) => cambiaDep(e.target.value)}
               className="mt-2 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 outline-none focus:border-red-600 sm:max-w-xs"
             >
               {DEPARTAMENTOS.map((d) => (
                 <option key={d.id} value={d.id}>
                   {d.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {necesitaProv && (
+          <div className="mt-4">
+            <label
+              htmlFor="prov-select"
+              className="text-sm font-semibold uppercase tracking-wide text-zinc-500"
+            >
+              Provincia
+            </label>
+            <select
+              id="prov-select"
+              value={prov}
+              onChange={(e) => setProv(e.target.value)}
+              className="mt-2 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 outline-none focus:border-red-600 sm:max-w-xs"
+            >
+              <option value="">Todas las provincias</option>
+              {provinciasDelDep.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nombre}
                 </option>
               ))}
             </select>
@@ -211,7 +254,7 @@ export default function Home() {
         </div>
 
         <Link
-          href={`/play?nivel=${nivel}&modo=${modo}${necesitaDep ? `&dep=${dep}` : ""}`}
+          href={`/play?nivel=${nivel}&modo=${modo}${necesitaDep ? `&dep=${dep}` : ""}${necesitaProv && prov ? `&prov=${prov}` : ""}`}
           className="mt-10 block w-full rounded-xl bg-red-600 px-6 py-4 text-center text-lg font-bold text-white shadow-md transition-colors hover:bg-red-700"
         >
           Jugar

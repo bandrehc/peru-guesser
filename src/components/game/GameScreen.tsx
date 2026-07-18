@@ -7,6 +7,7 @@ import type { Feature, FeatureCollection } from "geojson";
 import type { PathOptions } from "leaflet";
 import { loadDistritos, loadGeo, type UnitProperties } from "@/lib/geo";
 import { DEPARTAMENTOS } from "@/lib/departamentos";
+import { PROVINCIAS } from "@/lib/provincias";
 import { normalizeName } from "@/lib/normalize";
 import type { UnitRef } from "@/lib/types";
 import { useGame } from "@/hooks/useGame";
@@ -70,6 +71,7 @@ export default function GameScreen({
   nivel,
   modo,
   dep,
+  prov,
 }: {
   nivel: PlayableLevel;
   modo: PlayableMode;
@@ -79,6 +81,11 @@ export default function GameScreen({
    * departamento, mostrando únicamente su polígono).
    */
   dep?: string;
+  /**
+   * Código UBIGEO de provincia (4 dígitos). Solo en nivel "distritos":
+   * acota la ronda a los distritos de esa provincia.
+   */
+  prov?: string;
 }) {
   const [geo, setGeo] = useState<FeatureCollection | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -104,6 +111,16 @@ export default function GameScreen({
             ),
           };
         }
+        // Filtro provincial del nivel distrital: solo los distritos de la
+        // provincia elegida (sus 4 primeros dígitos de UBIGEO)
+        if (nivel === "distritos" && prov) {
+          data = {
+            ...data,
+            features: data.features.filter((f) =>
+              (f.properties as UnitProperties).id.startsWith(prov)
+            ),
+          };
+        }
         if (!cancelled) setGeo(data);
       } catch {
         if (!cancelled) setLoadError(true);
@@ -112,7 +129,7 @@ export default function GameScreen({
     return () => {
       cancelled = true;
     };
-  }, [nivel, dep]);
+  }, [nivel, dep, prov]);
 
   const units = useMemo<UnitRef[]>(() => {
     if (!geo) return [];
@@ -228,7 +245,11 @@ export default function GameScreen({
           {dep && nivel !== "departamentos" && (
             <span className="shrink-0 rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
               {nivel === "distritos" ? "Distritos" : "Provincias"} de{" "}
-              {DEPARTAMENTOS.find((d) => d.id === dep)?.nombre ?? dep}
+              {prov
+                ? `${PROVINCIAS.find((p) => p.id === prov)?.nombre ?? prov} (${
+                    DEPARTAMENTOS.find((d) => d.id === dep)?.nombre ?? dep
+                  })`
+                : (DEPARTAMENTOS.find((d) => d.id === dep)?.nombre ?? dep)}
             </span>
           )}
           <GameHud

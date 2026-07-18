@@ -5,6 +5,7 @@ import GameScreen, {
 } from "@/components/game/GameScreen";
 import PhotoGameScreen from "@/components/game/PhotoGameScreen";
 import { DEPARTAMENTOS } from "@/lib/departamentos";
+import { PROVINCIAS } from "@/lib/provincias";
 
 const NIVELES_DISPONIBLES = new Set<PlayableLevel>([
   "departamentos",
@@ -16,9 +17,14 @@ const MODOS_DISPONIBLES = new Set<string>(["pin", "escribir", "foto"]);
 export default async function PlayPage({
   searchParams,
 }: {
-  searchParams: Promise<{ nivel?: string; modo?: string; dep?: string }>;
+  searchParams: Promise<{
+    nivel?: string;
+    modo?: string;
+    dep?: string;
+    prov?: string;
+  }>;
 }) {
-  const { nivel = "departamentos", modo = "pin", dep } = await searchParams;
+  const { nivel = "departamentos", modo = "pin", dep, prov } = await searchParams;
 
   if (
     !NIVELES_DISPONIBLES.has(nivel as PlayableLevel) ||
@@ -41,11 +47,22 @@ export default async function PlayPage({
   // En provincias, dep es opcional (alcance local); si viene, debe ser válido
   if (nivel === "provincias" && dep !== undefined && !depValido) redirect("/");
 
+  // El filtro de provincia solo aplica al nivel distrital y debe pertenecer
+  // al departamento elegido (sus 2 primeros dígitos de UBIGEO)
+  const provValido =
+    nivel === "distritos" &&
+    dep !== undefined &&
+    prov !== undefined &&
+    prov.startsWith(dep) &&
+    PROVINCIAS.some((p) => p.id === prov);
+  if (prov !== undefined && !provValido) redirect("/");
+
   return (
     <GameScreen
       nivel={nivel as PlayableLevel}
       modo={modo as PlayableMode}
       dep={nivel === "departamentos" ? undefined : dep}
+      prov={provValido ? prov : undefined}
     />
   );
 }
