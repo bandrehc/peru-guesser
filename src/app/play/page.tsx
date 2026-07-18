@@ -3,6 +3,7 @@ import GameScreen, {
   type PlayableLevel,
   type PlayableMode,
 } from "@/components/game/GameScreen";
+import PhotoGameScreen from "@/components/game/PhotoGameScreen";
 import { DEPARTAMENTOS } from "@/lib/departamentos";
 
 const NIVELES_DISPONIBLES = new Set<PlayableLevel>([
@@ -10,7 +11,7 @@ const NIVELES_DISPONIBLES = new Set<PlayableLevel>([
   "provincias",
   "distritos",
 ]);
-const MODOS_DISPONIBLES = new Set<PlayableMode>(["pin", "escribir"]);
+const MODOS_DISPONIBLES = new Set<string>(["pin", "escribir", "foto"]);
 
 export default async function PlayPage({
   searchParams,
@@ -19,12 +20,17 @@ export default async function PlayPage({
 }) {
   const { nivel = "departamentos", modo = "pin", dep } = await searchParams;
 
-  // El modo fotográfico aún no está implementado
   if (
     !NIVELES_DISPONIBLES.has(nivel as PlayableLevel) ||
-    !MODOS_DISPONIBLES.has(modo as PlayableMode)
+    !MODOS_DISPONIBLES.has(modo)
   ) {
     redirect("/");
+  }
+
+  // El modo fotográfico solo existe a nivel departamental en esta fase
+  if (modo === "foto") {
+    if (nivel !== "departamentos") redirect("/");
+    return <PhotoGameScreen />;
   }
 
   const depValido = DEPARTAMENTOS.some((d) => d.id === dep);

@@ -41,8 +41,8 @@ const MODOS = [
   {
     id: "foto",
     nombre: "Fotográfico",
-    detalle: "¿Dónde se tomó esta foto?",
-    disponible: false,
+    detalle: "¿Dónde se tomó esta foto? (nivel departamental)",
+    disponible: true,
   },
 ];
 
@@ -115,7 +115,14 @@ export default function Home() {
   const [dep, setDep] = useState("15"); // Lima por defecto
 
   const necesitaDep =
-    nivel === "distritos" || (nivel === "provincias" && alcance === "local");
+    modo !== "foto" &&
+    (nivel === "distritos" || (nivel === "provincias" && alcance === "local"));
+
+  // El modo fotográfico solo existe a nivel departamental en esta fase
+  const seleccionaModo = (id: string) => {
+    setModo(id);
+    if (id === "foto") setNivel("departamentos");
+  };
 
   return (
     <div className="flex min-h-dvh flex-col items-center bg-zinc-50 px-4 py-10">
@@ -137,14 +144,14 @@ export default function Home() {
               key={n.id}
               nombre={n.nombre}
               detalle={n.detalle}
-              disponible={n.disponible}
+              disponible={n.disponible && (modo !== "foto" || n.id === "departamentos")}
               seleccionado={n.id === nivel}
               onSelect={() => setNivel(n.id)}
             />
           ))}
         </div>
 
-        {nivel === "provincias" && (
+        {nivel === "provincias" && modo !== "foto" && (
           <div className="mt-4">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
               Alcance
@@ -198,7 +205,7 @@ export default function Home() {
               detalle={m.detalle}
               disponible={m.disponible}
               seleccionado={m.id === modo}
-              onSelect={() => setModo(m.id)}
+              onSelect={() => seleccionaModo(m.id)}
             />
           ))}
         </div>

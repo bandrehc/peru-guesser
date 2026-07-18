@@ -9,6 +9,8 @@ interface SummaryModalProps {
   errores: number;
   tiempoMs: number;
   onRestart: () => void;
+  /** "identificacion": rondas pin/escribir; "foto": una oportunidad por foto. */
+  variant?: "identificacion" | "foto";
 }
 
 export default function SummaryModal({
@@ -17,6 +19,7 @@ export default function SummaryModal({
   errores,
   tiempoMs,
   onRestart,
+  variant = "identificacion",
 }: SummaryModalProps) {
   return (
     <div
@@ -31,11 +34,11 @@ export default function SummaryModal({
         </h2>
         <dl className="mt-4 space-y-2 text-zinc-700">
           <div className="flex justify-between">
-            <dt>Unidades identificadas</dt>
+            <dt>{variant === "foto" ? "Fotos jugadas" : "Unidades identificadas"}</dt>
             <dd className="font-semibold tabular-nums">{total}</dd>
           </div>
           <div className="flex justify-between">
-            <dt>Al primer intento</dt>
+            <dt>{variant === "foto" ? "Aciertos" : "Al primer intento"}</dt>
             <dd className="font-semibold tabular-nums text-emerald-700">
               {perfectas} ({Math.round((perfectas / total) * 100)}%)
             </dd>

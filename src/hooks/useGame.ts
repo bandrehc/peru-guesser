@@ -20,7 +20,13 @@ export interface GameState {
 
 export type GameAction =
   | { type: "START"; units: UnitRef[] }
-  | { type: "RESOLVE"; correct: boolean; flashUnitId: string | null }
+  | {
+      type: "RESOLVE";
+      correct: boolean;
+      flashUnitId: string | null;
+      /** Modo fotográfico: un intento por objetivo, se avanza aunque falle. */
+      advanceOnFail?: boolean;
+    }
   | { type: "CLEAR_FLASH" };
 
 const initialState: GameState = {
@@ -64,8 +70,13 @@ function reducer(state: GameState, action: GameAction): GameState {
         };
       }
 
+      const queue = action.advanceOnFail ? state.queue.slice(1) : state.queue;
+      const finished = queue.length === 0;
       return {
         ...state,
+        queue,
+        status: finished ? "finished" : "playing",
+        finishedAt: finished ? Date.now() : null,
         errores: state.errores + 1,
         fallosPorUnidad: {
           ...state.fallosPorUnidad,
@@ -99,8 +110,11 @@ export function useGame() {
     []
   );
   const resolve = useCallback(
-    (correct: boolean, flashUnitId: string | null = null) =>
-      dispatch({ type: "RESOLVE", correct, flashUnitId }),
+    (
+      correct: boolean,
+      flashUnitId: string | null = null,
+      advanceOnFail = false
+    ) => dispatch({ type: "RESOLVE", correct, flashUnitId, advanceOnFail }),
     []
   );
   const clearFlash = useCallback(() => dispatch({ type: "CLEAR_FLASH" }), []);

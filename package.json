@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "data:fetch": "node scripts/fetch-geo.mjs",
-    "data:build": "node scripts/build-geo.mjs"
+    "data:build": "node scripts/build-geo.mjs",
+    "data:fotos": "node scripts/fetch-fotos.mjs"
   },
   "dependencies": {
     "leaflet": "^1.9.4",
