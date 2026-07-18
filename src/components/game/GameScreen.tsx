@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Feature, FeatureCollection } from "geojson";
 import type { PathOptions } from "leaflet";
-import { loadGeo, type UnitProperties } from "@/lib/geo";
+import { loadDistritos, loadGeo, type UnitProperties } from "@/lib/geo";
+import { DEPARTAMENTOS } from "@/lib/departamentos";
 import { normalizeName } from "@/lib/normalize";
 import type { UnitRef } from "@/lib/types";
 import { useGame } from "@/hooks/useGame";
@@ -57,19 +58,23 @@ const FLASH_MS = 650;
 const RESULT_MS = 1200;
 
 export type PlayableMode = "pin" | "escribir";
-export type PlayableLevel = "departamentos" | "provincias";
+export type PlayableLevel = "departamentos" | "provincias" | "distritos";
 
 const ESCRIBIR_PROMPT: Record<PlayableLevel, string> = {
   departamentos: "¿Qué departamento está resaltado?",
   provincias: "¿Qué provincia está resaltada?",
+  distritos: "¿Qué distrito está resaltado?",
 };
 
 export default function GameScreen({
   nivel,
   modo,
+  dep,
 }: {
   nivel: PlayableLevel;
   modo: PlayableMode;
+  /** Código UBIGEO del departamento; requerido cuando nivel === "distritos". */
+  dep?: string;
 }) {
   const [geo, setGeo] = useState<FeatureCollection | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -77,15 +82,25 @@ export default function GameScreen({
   const { state, start, resolve, clearFlash } = useGame();
 
   useEffect(() => {
-    loadGeo(nivel)
-      .then(setGeo)
-      .catch(() => setLoadError(true));
-  }, [nivel]);
+    const promise =
+      nivel === "distritos" && dep ? loadDistritos(dep) : loadGeo(nivel as "departamentos" | "provincias");
+    promise.then(setGeo).catch(() => setLoadError(true));
+  }, [nivel, dep]);
 
   const units = useMemo<UnitRef[]>(() => {
     if (!geo) return [];
+    // Nombres repetidos dentro de la ronda (ej. dos "SAN ANTONIO" en Lima)
+    // se desambiguan con la provincia; el nombre base queda como alias.
+    const repetidos = new Map<string, number>();
+    for (const f of geo.features) {
+      const n = (f.properties as UnitProperties).nombre;
+      repetidos.set(n, (repetidos.get(n) ?? 0) + 1);
+    }
     return geo.features.map((f) => {
       const p = f.properties as UnitProperties;
+      if ((repetidos.get(p.nombre) ?? 0) > 1 && p.prov) {
+        return { id: p.id, nombre: `${p.nombre} (${p.prov})`, alias: p.nombre };
+      }
       return { id: p.id, nombre: p.nombre };
     });
   }, [geo]);
@@ -125,7 +140,10 @@ export default function GameScreen({
   const handleAnswer = useCallback(
     (text: string) => {
       if (!target || state.status !== "playing") return;
-      const ok = normalizeName(text) === normalizeName(target.nombre);
+      const typed = normalizeName(text);
+      const ok =
+        typed === normalizeName(target.nombre) ||
+        (target.alias !== undefined && typed === normalizeName(target.alias));
       // En error, el destello rojo cae sobre la unidad resaltada
       resolve(ok, ok ? null : target.id);
       setLastResult(ok ? "ok" : "fail");
@@ -180,6 +198,11 @@ export default function GameScreen({
           >
             ←
           </Link>
+          {nivel === "distritos" && dep && (
+            <span className="shrink-0 rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
+              Distritos de {DEPARTAMENTOS.find((d) => d.id === dep)?.nombre ?? dep}
+            </span>
+          )}
           <GameHud
             prompt={
               modo === "pin" ? (

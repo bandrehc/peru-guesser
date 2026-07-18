@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { DEPARTAMENTOS } from "@/lib/departamentos";
 
 const NIVELES = [
   {
@@ -19,8 +20,8 @@ const NIVELES = [
   {
     id: "distritos",
     nombre: "Distrital",
-    detalle: "~1874 distritos",
-    disponible: false,
+    detalle: "1874 distritos, por departamento",
+    disponible: true,
   },
 ];
 
@@ -97,6 +98,7 @@ function OptionCard({
 export default function Home() {
   const [nivel, setNivel] = useState("departamentos");
   const [modo, setModo] = useState("pin");
+  const [dep, setDep] = useState("15"); // Lima por defecto
 
   return (
     <div className="flex min-h-dvh flex-col items-center bg-zinc-50 px-4 py-10">
@@ -125,6 +127,29 @@ export default function Home() {
           ))}
         </div>
 
+        {nivel === "distritos" && (
+          <div className="mt-4">
+            <label
+              htmlFor="dep-select"
+              className="text-sm font-semibold uppercase tracking-wide text-zinc-500"
+            >
+              Departamento
+            </label>
+            <select
+              id="dep-select"
+              value={dep}
+              onChange={(e) => setDep(e.target.value)}
+              className="mt-2 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 outline-none focus:border-red-600 sm:max-w-xs"
+            >
+              {DEPARTAMENTOS.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <h2 className="mt-8 text-sm font-semibold uppercase tracking-wide text-zinc-500">
           Modo
         </h2>
@@ -142,7 +167,7 @@ export default function Home() {
         </div>
 
         <Link
-          href={`/play?nivel=${nivel}&modo=${modo}`}
+          href={`/play?nivel=${nivel}&modo=${modo}${nivel === "distritos" ? `&dep=${dep}` : ""}`}
           className="mt-10 block w-full rounded-xl bg-red-600 px-6 py-4 text-center text-lg font-bold text-white shadow-md transition-colors hover:bg-red-700"
         >
           Jugar

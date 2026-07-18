@@ -94,7 +94,7 @@ El banco es un JSON estático curado (`data/fotos/departamentos.json`) con: URL,
 | 3 | Motor de juego + Modo Pin departamental (juego completo jugable: pintado permanente, parpadeo rojo en error, resumen con tiempo) | ✅ Hecho |
 | 4 | Modo Escribir: normalización tildes/mayúsculas, autocompletado accesible (combobox ARIA) | ✅ Hecho |
 | 5 | Nivel provincial en ambos modos de identificación | ✅ Hecho |
-| 6 | Nivel distrital: carga perezosa por departamento, rendimiento en móvil | Pendiente |
+| 6 | Nivel distrital: carga perezosa por departamento, rendimiento en móvil | ✅ Hecho (una ronda = los distritos de un departamento; nombres duplicados desambiguados con la provincia) |
 | 7 | Modo Fotográfico departamental: script de candidatos + curación + integración | Pendiente |
 | 8 | Pulido: accesibilidad (ícono/patrón además de color para daltonismo), responsive, QA, deploy final | Pendiente |
 
